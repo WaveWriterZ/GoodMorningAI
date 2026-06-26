@@ -1,23 +1,240 @@
 {
-  "msid": "",
-  "title": "",
-  "classification": "",
-  "status": "",
-  "evidenceLevel": "",
-  "purpose": "",
-  "summary": "",
-  "description": "",
-  "created": "",
-  "updated": "",
-  "version": "",
-  "steward": "",
-  "contributors": [],
-  "relationships": [],
-  "dependencies": [],
-  "supportingEvidence": [],
-  "contradictoryEvidence": [],
-  "alternativeExplanations": [],
-  "openQuestions": [],
-  "futureWork": [],
-  "history": []
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Knowledge Object",
+  "description": "Universal Knowledge Object (UKO) used throughout GoodMorningAI, Repository Zero, Mission Systems, and the LHS Research Initiative.",
+  "type": "object",
+
+  "required": [
+    "msid",
+    "title",
+    "classification",
+    "status",
+    "version",
+    "purpose",
+    "created",
+    "updated"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "msid": { "type": "string" },
+        "title": { "type": "string" },
+        "classification": { "type": "string" },
+        "status": { "type": "string" },
+        "version": { "type": "string" },
+        "created": { "type": "string", "format": "date-time" },
+        "updated": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "ownership": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string",
+          "default": "Ashley Tucker"
+        },
+        "organization": {
+          "type": "string",
+          "default": "LHS Legacy LLC"
+        },
+        "project": {
+          "type": "string",
+          "default": "GoodMorningAI"
+        },
+        "framework": {
+          "type": "string",
+          "default": "Mission Systems"
+        },
+        "researchInitiative": {
+          "type": "string",
+          "default": ""
+        },
+        "license": {
+          "type": "string",
+          "default": "MIT"
+        },
+        "steward": {
+          "type": "string"
+        },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "content": {
+      "type": "object",
+      "properties": {
+        "purpose": { "type": "string" },
+        "summary": { "type": "string" },
+        "description": { "type": "string" },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "research": {
+      "type": "object",
+      "properties": {
+        "evidenceLevel": { "type": "string" },
+        "confidence": { "type": "string" },
+        "reviewStatus": { "type": "string" },
+        "reviewDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "implementationStatus": {
+          "type": "string"
+        },
+        "openQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "futureWork": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "supportingEvidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "source": { "type": "string" },
+              "type": { "type": "string" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "contradictoryEvidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "source": { "type": "string" },
+              "type": { "type": "string" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "alternativeExplanations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "msid": {
+            "type": "string"
+          },
+          "relationshipType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "structure": {
+      "type": "object",
+      "properties": {
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relatedObjects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "parent": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "governance": {
+      "type": "object",
+      "properties": {
+        "lastReviewedBy": {
+          "type": "string"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
 }
