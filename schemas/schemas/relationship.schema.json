@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Relationship Schema",
+  "description": "Defines relationships between Knowledge Objects within GoodMorningAI and Repository Zero.",
+  "type": "object",
+
+  "required": [
+    "relationshipId",
+    "sourceId",
+    "targetId",
+    "relationshipType",
+    "status"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "relationshipId": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "connection": {
+      "type": "object",
+      "properties": {
+        "sourceId": {
+          "type": "string"
+        },
+        "targetId": {
+          "type": "string"
+        },
+        "relationshipType": {
+          "type": "string",
+          "enum": [
+            "supports",
+            "depends_on",
+            "implements",
+            "extends",
+            "references",
+            "related_to",
+            "inspired_by",
+            "derived_from",
+            "contradicts",
+            "supersedes",
+            "part_of",
+            "parent_of",
+            "child_of",
+            "created_by",
+            "owned_by",
+            "reviewed_by",
+            "measures",
+            "tests",
+            "documents",
+            "unknown"
+          ]
+        }
+      }
+    },
+
+    "description": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "Low",
+            "Moderate",
+            "High",
+            "Very High"
+          ]
+        },
+        "evidenceLevel": {
+          "type": "string"
+        },
+        "supportingEvidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "governance": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string",
+          "default": "Ashley Tucker"
+        },
+        "organization": {
+          "type": "string",
+          "default": "LHS Legacy LLC"
+        },
+        "approvedBy": {
+          "type": "string"
+        },
+        "reviewDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "notes": {
+      "type": "string"
+    }
+  }
+}
