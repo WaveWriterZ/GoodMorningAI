@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Evidence Schema",
+  "description": "Defines evidence objects used throughout GoodMorningAI, Repository Zero, and Mission Systems.",
+  "type": "object",
+
+  "required": [
+    "evidenceId",
+    "title",
+    "evidenceLevel",
+    "status",
+    "sourceType"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "evidenceId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "ownership": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "organization": {
+          "type": "string",
+          "default": "LHS Legacy LLC"
+        },
+        "project": {
+          "type": "string",
+          "default": "GoodMorningAI"
+        }
+      }
+    },
+
+    "classification": {
+      "type": "object",
+      "properties": {
+        "evidenceLevel": {
+          "type": "string",
+          "enum": [
+            "E0",
+            "E1",
+            "E2",
+            "E3",
+            "E4",
+            "E5",
+            "E6",
+            "E7"
+          ]
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "Low",
+            "Moderate",
+            "High",
+            "Very High"
+          ]
+        },
+        "sourceType": {
+          "type": "string",
+          "enum": [
+            "Historical Record",
+            "Primary Source",
+            "Secondary Source",
+            "Peer Reviewed",
+            "Book",
+            "Government",
+            "Organization",
+            "Experiment",
+            "Case Study",
+            "Interview",
+            "Observation",
+            "Dataset",
+            "Software",
+            "Other"
+          ]
+        }
+      }
+    },
+
+    "content": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "citation": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "publicationDate": {
+          "type": "string"
+        }
+      }
+    },
+
+    "analysis": {
+      "type": "object",
+      "properties": {
+        "supports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contradicts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alternativeInterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "msid": {
+            "type": "string"
+          },
+          "relationshipType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "review": {
+      "type": "object",
+      "properties": {
+        "reviewStatus": {
+          "type": "string"
+        },
+        "reviewedBy": {
+          "type": "string"
+        },
+        "reviewDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nextReview": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
