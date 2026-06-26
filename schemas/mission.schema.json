@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Mission Schema",
+  "description": "Defines a mission within the Mission Systems ecosystem.",
+  "type": "object",
+
+  "required": [
+    "missionId",
+    "name",
+    "status",
+    "purpose",
+    "vision"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "missionId": { "type": "string" },
+        "name": { "type": "string" },
+        "shortName": { "type": "string" },
+        "version": { "type": "string" },
+        "status": { "type": "string" },
+        "created": { "type": "string", "format": "date-time" },
+        "updated": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "ownership": {
+      "type": "object",
+      "properties": {
+        "organization": {
+          "type": "string",
+          "default": "LHS Legacy LLC"
+        },
+        "project": {
+          "type": "string",
+          "default": "GoodMorningAI"
+        },
+        "owner": { "type": "string" },
+        "stewards": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "mission": {
+      "type": "object",
+      "properties": {
+        "purpose": { "type": "string" },
+        "vision": { "type": "string" },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "objectives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "successMeasures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "currentProgress": {
+          "type": "number"
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "missionId": { "type": "string" },
+          "relationshipType": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "futureWork": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
