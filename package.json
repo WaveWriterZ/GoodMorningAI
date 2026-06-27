@@ -5,9 +5,7 @@
   "description": "GoodMorningAI - Mission Systems Reference Platform",
   "author": "LHS Legacy LLC",
   "license": "MIT",
-
   "packageManager": "pnpm@10",
-
   "scripts": {
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
