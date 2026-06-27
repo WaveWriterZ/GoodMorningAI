@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Workspace Schema",
+  "description": "Defines collaborative workspaces that organize knowledge, missions, research, software, and contributors.",
+  "type": "object",
+
+  "required": [
+    "workspaceId",
+    "name",
+    "workspaceType",
+    "status"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "workspaceId": {
+          "type": "string"
+        },
+        "msid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "workspaceType": {
+          "type": "string",
+          "enum": [
+            "Mission",
+            "Research",
+            "Organization",
+            "Education",
+            "Software",
+            "Community",
+            "Evidence",
+            "Personal",
+            "Innovation",
+            "Archive"
+          ]
+        },
+        "status": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "ownership": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "type": "string"
+        },
+        "organization": {
+          "type": "string",
+          "default": "LHS Legacy LLC"
+        },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "mission": {
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "type": "string"
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "objectives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "resources": {
+      "type": "object",
+      "properties": {
+        "missions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "knowledgeObjects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "researchProjects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "organizations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "people": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "softwareModules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "dashboard": {
+      "type": "object",
+      "properties": {
+        "priority": {
+          "type": "string"
+        },
+        "health": {
+          "type": "string"
+        },
+        "progress": {
+          "type": "number"
+        },
+        "lastActivity": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "futureWork": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
