@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Identifier (MSID) Schema",
+  "description": "Defines the universal identifier standard for all Mission Systems objects.",
+  "type": "object",
+
+  "required": [
+    "msid",
+    "objectType",
+    "namespace",
+    "created",
+    "status"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+
+        "msid": {
+          "type": "string",
+          "description": "Example: MS-2026-RES-000001"
+        },
+
+        "namespace": {
+          "type": "string",
+          "description": "Owning organization or repository namespace"
+        },
+
+        "objectType": {
+          "type": "string",
+          "enum": [
+            "Knowledge",
+            "Mission",
+            "Research",
+            "Evidence",
+            "Pattern",
+            "Relationship",
+            "Action",
+            "Workspace",
+            "Organization",
+            "Person",
+            "Software",
+            "Experiment",
+            "Dataset",
+            "Publication",
+            "Policy",
+            "Standard",
+            "API",
+            "Issue",
+            "Release",
+            "Other"
+          ]
+        },
+
+        "sequence": {
+          "type": "integer"
+        },
+
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Active",
+            "Archived",
+            "Deprecated"
+          ]
+        }
+
+      }
+    },
+
+    "ownership": {
+      "type": "object",
+      "properties": {
+
+        "organization": {
+          "type": "string",
+          "default": "LHS Legacy LLC"
+        },
+
+        "repository": {
+          "type": "string",
+          "default": "GoodMorningAI"
+        },
+
+        "steward": {
+          "type": "string"
+        }
+
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "notes": {
+      "type": "string"
+    }
+
+  }
+}
