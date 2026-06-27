@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Research Schema",
+  "description": "Defines a living research project within GoodMorningAI and Repository Zero.",
+  "type": "object",
+
+  "required": [
+    "researchId",
+    "title",
+    "status",
+    "stage"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "researchId": {
+          "type": "string"
+        },
+        "msid": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string",
+          "enum": [
+            "Observation",
+            "Question",
+            "Literature Review",
+            "Hypothesis",
+            "Study Design",
+            "Data Collection",
+            "Analysis",
+            "Results",
+            "Replication",
+            "Published",
+            "Archived"
+          ]
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "ownership": {
+      "type": "object",
+      "properties": {
+        "leadResearcher": {
+          "type": "string"
+        },
+        "organization": {
+          "type": "string",
+          "default": "LHS Legacy LLC"
+        },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "research": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "background": {
+          "type": "string"
+        },
+        "literatureReview": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "futureResearch": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "evidenceLevel": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string"
+        },
+        "supportingEvidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contradictoryEvidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alternativeExplanations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "notes": {
+      "type": "string"
+    }
+  }
+}
