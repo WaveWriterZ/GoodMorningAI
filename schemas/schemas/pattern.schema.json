@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Pattern Schema",
+  "description": "Universal schema for documenting, analyzing, comparing, and studying recurring patterns across any discipline.",
+  "type": "object",
+
+  "required": [
+    "patternId",
+    "name",
+    "status",
+    "patternType"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "patternId": { "type": "string" },
+        "msid": { "type": "string" },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "status": { "type": "string" },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "classification": {
+      "type": "object",
+      "properties": {
+        "patternType": {
+          "type": "string"
+        },
+        "discipline": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        }
+      }
+    },
+
+    "pattern": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "triggerConditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "observableIndicators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "possibleOutcomes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "research": {
+      "type": "object",
+      "properties": {
+        "researchPrograms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relatedStudies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "caseStudies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "evidenceLevel": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string"
+        },
+        "supportingEvidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contradictoryEvidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alternativeExplanations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "futureResearch": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "notes": {
+      "type": "string"
+    }
+  }
+}
