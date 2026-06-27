@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mission Systems Action Schema",
+  "description": "Defines universal actions that may be performed on any Mission Systems object.",
+  "type": "object",
+
+  "required": [
+    "actionId",
+    "actionType",
+    "objectId",
+    "timestamp"
+  ],
+
+  "properties": {
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "actionId": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "performedBy": {
+          "type": "string"
+        }
+      }
+    },
+
+    "target": {
+      "type": "object",
+      "properties": {
+        "objectId": {
+          "type": "string"
+        },
+        "objectType": {
+          "type": "string"
+        }
+      }
+    },
+
+    "action": {
+      "type": "object",
+      "properties": {
+        "actionType": {
+          "type": "string",
+          "enum": [
+            "Create",
+            "Read",
+            "Update",
+            "Delete",
+            "Archive",
+            "Restore",
+            "Review",
+            "Approve",
+            "Reject",
+            "Connect",
+            "Disconnect",
+            "Validate",
+            "Version",
+            "Search",
+            "Analyze",
+            "Compare",
+            "Measure",
+            "Teach",
+            "Publish",
+            "Replicate",
+            "Observe"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+
+    "results": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nextActions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
