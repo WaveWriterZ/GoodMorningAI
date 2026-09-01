@@ -6,3 +6,4 @@
 export * from './health';
 export * from './status';
 export * from './learning';
+export * from './trust';
