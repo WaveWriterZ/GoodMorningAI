@@ -5,3 +5,6 @@
 
 export * from './health';
 export * from './status';
+export * from './learning';
+export * from './trust';
+export * from './decision';
