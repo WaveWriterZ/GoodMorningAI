@@ -10,3 +10,4 @@ export * from './trust';
 export * from './decision';
 export * from './execution';
 export * from './capability-gateway';
+export * from './mission-execution';
