@@ -12,3 +12,4 @@ export * from './execution';
 export * from './capability-gateway';
 export * from './mission-execution';
 export * from './mission-events';
+export * from './closed-loop';
