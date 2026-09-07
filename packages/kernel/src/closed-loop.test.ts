@@ -1,8 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
-import { CapabilityGateway } from './capability-gateway';
+import { describe, expect, it, jest } from '@jest/globals';
+import { CapabilityGateway, CapabilityAdapter } from './capability-gateway';
 import { ClosedLoopIntegration } from './closed-loop';
-import { MissionEventStore, InMemoryMissionEventStore } from './mission-events';
-import { CapabilityAdapter } from './capability-gateway';
+import { InMemoryMissionEventStore } from './mission-events';
 
 const request = {
   requestId: 'req-60', decisionId: 'dec-60', authorizationId: 'auth-60', actorId: 'actor-60',
@@ -44,9 +43,9 @@ describe('Module 60 closed-loop integration', () => {
     expect((observed[0] as { outcome: string }).outcome).toBe('success');
   });
 
-  it('does not emit success learning when verification fails', () => {
+  it('maps verification failure to a failure learning observation', () => {
     const store = new InMemoryMissionEventStore();
-    const onLearningObservation = vi.fn();
+    const onLearningObservation = jest.fn();
     const integration = new ClosedLoopIntegration(store, { onLearningObservation });
     const gateway = new CapabilityGateway();
     gateway.register(adapter({ verify: () => ({ passed: false, reasons: ['mismatch'], verifiedAt: 30 }) }));
@@ -64,7 +63,7 @@ describe('Module 60 closed-loop integration', () => {
     const store = new InMemoryMissionEventStore();
     const integration = new ClosedLoopIntegration(store);
     const gateway = new CapabilityGateway();
-    const execute = vi.fn(() => ({ succeeded: true, output: 'should-not-run', completedAt: 20 }));
+    const execute = jest.fn(() => ({ succeeded: true, output: 'should-not-run', completedAt: 20 }));
     gateway.register(adapter({ execute }));
     const coordinator = integration.wireCoordinator(gateway);
 
