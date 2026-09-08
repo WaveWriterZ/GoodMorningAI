@@ -57,10 +57,11 @@ export function validateVerticalSlice(input: VerticalSliceInput): VerticalSliceR
     ...(decision.id === evaluation.decisionId ? [] : ['decision/evaluation IDs do not match']),
   ]));
 
-  checks.push(check('authorization', decision.status === 'authorized,', decision.status === 'authorized,' ? [] : ['decision is not explicitly authorized']));
+  const authorized = decision.status === 'authorized';
+  checks.push(check('authorization', authorized, authorized ? [] : ['decision is not explicitly authorized']));
 
   const executionReady = execution.decisionId === decision.id && execution.request.decisionId === decision.id;
-  checks.push(check('execution', executionReady, executionReady ? [] : ['execution is not linked to the decision']))
+  checks.push(check('execution', executionReady, executionReady ? [] : ['execution is not linked to the decision']));
 
   const verified = execution.status === 'completed' && execution.verification?.status === 'verified';
   checks.push(check('verification', verified, verified ? [] : ['mission is not verified-complete']));
