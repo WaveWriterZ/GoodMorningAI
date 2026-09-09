@@ -14,10 +14,19 @@ describe('Module 62 — reference mission harness', () => {
     expect(result.validation.checks.every((item) => item.passed)).toBe(true);
   });
 
-  it('fails closed when authorization is removed before execution', () => {
-    const result = runReferenceMission({ now: 1_700_000_000_000 });
-    const authorizationCheck = result.validation.checks.find((item) => item.check === 'authorization');
+  it('produces a trace that identifies the mission, decision, events, and learning outcome', () => {
+    const result = runReferenceMission({
+      now: 1_700_000_000_000,
+      missionId: 'mission-trace-test',
+      decisionId: 'decision-trace-test',
+    });
 
-    expect(authorizationCheck?.passed).toBe(true);
+    expect(result.validation.trace).toEqual([
+      'decision:decision-trace-test',
+      'mission:mission-trace-test',
+      expect.stringMatching(/^events:\d+$/),
+      'verified:true',
+      'learning:true',
+    ]);
   });
 });
