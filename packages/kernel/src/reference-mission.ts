@@ -2,7 +2,7 @@
  * Module 62 — Autonomous Reference Mission Harness
  *
  * Provides one deterministic, side-effect-free composition root for the
- * autonomous kernel. The harness proves the contracts across trust, decision,
+ * autonomous kernel. The harness proves the contracts across decision,
  * execution, mission telemetry, learning, and vertical validation without
  * connecting to external services.
  */
@@ -35,14 +35,17 @@ export interface ReferenceMissionConfig {
 export interface ReferenceMissionResult {
   decision: DecisionRecord;
   evaluation: ReturnType<typeof evaluateDecision>;
-  mission: ReturnType<MissionExecutionCoordinator['get']>;
+  mission: NonNullable<ReturnType<MissionExecutionCoordinator['get']>>;
   telemetry?: MissionTelemetry;
   learningObservation?: LearningObservation;
   validation: VerticalSliceReport;
 }
 
 /** A deterministic adapter used only by the reference harness and tests. */
-export function createReferenceAdapter(capabilityId = 'reference.echo'): CapabilityAdapter {
+export function createReferenceAdapter(
+  capabilityId = 'reference.echo',
+  clock: () => number = () => Date.now()
+): CapabilityAdapter {
   return {
     capabilityId,
     version: '1.0.0',
@@ -50,12 +53,12 @@ export function createReferenceAdapter(capabilityId = 'reference.echo'): Capabil
     execute: (request) => ({
       succeeded: true,
       output: `reference-executed:${request.action}`,
-      completedAt: Date.now(),
+      completedAt: clock(),
     }),
     verify: (_request, result) => ({
       passed: result.succeeded,
       reasons: result.succeeded ? ['reference execution verified'] : ['reference execution failed'],
-      verifiedAt: Date.now(),
+      verifiedAt: clock(),
     }),
   };
 }
@@ -102,7 +105,7 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
   const authorizedDecision = authorizeDecision(evaluatedDecision, true);
 
   const gateway = new CapabilityGateway();
-  gateway.register(createReferenceAdapter(capabilityId));
+  gateway.register(createReferenceAdapter(capabilityId, () => now));
 
   const store = new MissionEventStore();
   let learningObservation: LearningObservation | undefined;
@@ -137,7 +140,6 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
     requiredEvidenceValid: true,
   };
   const mission = coordinator.execute(missionId, policy, now);
-  const telemetry = closedLoop.telemetry(store, missionId);
   const events = store.byMission(missionId);
 
   const validation = validateVerticalSlice({
@@ -152,7 +154,7 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
     decision: authorizedDecision,
     evaluation,
     mission,
-    telemetry,
+    telemetry: closedLoop.telemetry(store, missionId),
     learningObservation,
     validation,
   };
