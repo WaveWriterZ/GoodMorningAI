@@ -14,3 +14,4 @@ export * from './mission-execution';
 export * from './mission-events';
 export * from './closed-loop';
 export * from './vertical-validation';
+export * from './reference-mission';
