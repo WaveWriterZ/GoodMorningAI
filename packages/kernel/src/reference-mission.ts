@@ -1,15 +1,13 @@
 /**
- * Module 62 — Autonomous Reference Mission Harness
+ * Module 62/63 — Autonomous Reference Mission Harness
  *
  * Provides one deterministic, side-effect-free composition root for the
- * autonomous kernel. The harness proves the contracts across decision,
- * execution, mission telemetry, learning, and vertical validation without
- * connecting to external services.
+ * autonomous kernel. The decision path is grounded by Module 63 so evidence
+ * is assessed by Module 54 before Module 55 evaluation.
  */
 
 import {
   authorizeDecision,
-  evaluateDecision,
   markDecisionEvaluated,
   DecisionRecord,
 } from './decision';
@@ -19,6 +17,8 @@ import { MissionEventStore } from './mission-events';
 import { ClosedLoopIntegration, MissionTelemetry } from './closed-loop';
 import { LearningObservation } from './learning';
 import { validateVerticalSlice, VerticalSliceReport } from './vertical-validation';
+import { EvidenceBundle } from './trust';
+import { evaluateEvidenceGroundedDecision } from './evidence-decision-bridge';
 
 export interface ReferenceMissionConfig {
   now?: number;
@@ -34,11 +34,12 @@ export interface ReferenceMissionConfig {
 
 export interface ReferenceMissionResult {
   decision: DecisionRecord;
-  evaluation: ReturnType<typeof evaluateDecision>;
+  evaluation: ReturnType<typeof evaluateEvidenceGroundedDecision>;
   mission: NonNullable<ReturnType<MissionExecutionCoordinator['get']>>;
   telemetry?: MissionTelemetry;
   learningObservation?: LearningObservation;
   validation: VerticalSliceReport;
+  evidence: EvidenceBundle[];
 }
 
 /** A deterministic adapter used only by the reference harness and tests. */
@@ -63,10 +64,7 @@ export function createReferenceAdapter(
   };
 }
 
-/**
- * Builds and executes a complete reference mission through the real kernel
- * contracts. No external side effect is performed by the harness adapter.
- */
+/** Builds and executes a complete reference mission through the real kernel contracts. */
 export function runReferenceMission(config: ReferenceMissionConfig = {}): ReferenceMissionResult {
   const now = config.now ?? 1_700_000_000_000;
   const missionId = config.missionId ?? 'reference-mission-1';
@@ -100,9 +98,37 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
     createdAt: now,
   };
 
-  const evaluation = evaluateDecision(decision, ['reference-evidence-1']);
-  const evaluatedDecision = markDecisionEvaluated(decision, evaluation);
-  const authorizedDecision = authorizeDecision(evaluatedDecision, true);
+  const evidence: EvidenceBundle[] = [{
+    source: {
+      id: 'reference-source-1',
+      type: 'document',
+      locator: 'reference://module-63',
+      provider: 'goodmorning-reference',
+      capturedAt: now,
+      trust: 1,
+    },
+    evidence: {
+      id: 'reference-evidence-1',
+      sourceId: 'reference-source-1',
+      contentHash: 'reference-hash-1',
+      observedAt: now,
+      capturedAt: now,
+      freshnessSeconds: 3600,
+      verificationStatus: 'verified',
+      confidence: 1,
+    },
+    provenance: [{
+      id: 'reference-provenance-1',
+      evidenceId: 'reference-evidence-1',
+      origin: 'reference-harness',
+      actor: actorId,
+      timestamp: now,
+    }],
+  }];
+
+  const grounded = evaluateEvidenceGroundedDecision({ decision, evidence, now });
+  const evaluatedDecision = markDecisionEvaluated(decision, grounded.evaluation);
+  const authorizedDecision = authorizeDecision(evaluatedDecision, grounded.ready);
 
   const gateway = new CapabilityGateway();
   gateway.register(createReferenceAdapter(capabilityId, () => now));
@@ -137,14 +163,14 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
     permissionGranted: true,
     safetyPassed: true,
     targetUnchanged: true,
-    requiredEvidenceValid: true,
+    requiredEvidenceValid: grounded.trustedEvidenceIds.length > 0,
   };
   const mission = coordinator.execute(missionId, policy, now);
   const events = store.byMission(missionId);
 
   const validation = validateVerticalSlice({
     decision: authorizedDecision,
-    evaluation,
+    evaluation: grounded.evaluation,
     execution: mission,
     events,
     learningObservation,
@@ -152,10 +178,11 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
 
   return {
     decision: authorizedDecision,
-    evaluation,
+    evaluation: grounded,
     mission,
     telemetry: closedLoop.telemetry(store, missionId),
     learningObservation,
     validation,
+    evidence,
   };
 }
