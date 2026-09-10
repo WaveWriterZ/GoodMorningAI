@@ -1,10 +1,12 @@
 import { runReferenceMission } from './reference-mission';
 
-describe('Module 62 — reference mission harness', () => {
+describe('Module 62/63 — reference mission harness', () => {
   it('runs the complete autonomous kernel slice deterministically', () => {
     const result = runReferenceMission({ now: 1_700_000_000_000 });
 
-    expect(result.evaluation.passed).toBe(true);
+    expect(result.evaluation.evaluation.passed).toBe(true);
+    expect(result.evaluation.ready).toBe(true);
+    expect(result.evaluation.trustedEvidenceIds).toEqual(['reference-evidence-1']);
     expect(result.decision.status).toBe('authorized');
     expect(result.mission.status).toBe('completed');
     expect(result.mission.verification?.status).toBe('verified');
