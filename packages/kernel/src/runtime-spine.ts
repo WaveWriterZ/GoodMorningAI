@@ -2,9 +2,8 @@
  * Module 64 — Autonomous Integration Spine & Durable State Boundary
  *
  * Provides the application composition root and persistence interfaces for the
- * autonomous kernel. The kernel owns contracts; deployments provide durable
- * repository implementations. The included in-memory stores are deterministic
- * reference implementations for tests and local development only.
+ * autonomous kernel. Deployments provide durable repository implementations;
+ * the included in-memory stores are deterministic reference implementations.
  */
 
 import { authorizeDecision, markDecisionEvaluated, DecisionRecord } from './decision';
@@ -35,30 +34,21 @@ export interface LearningObservationRepository {
 
 export class InMemoryEvidenceRepository implements EvidenceRepository {
   private readonly records = new Map<string, EvidenceBundle>();
-
   save(bundle: EvidenceBundle): void {
     if (!bundle.evidence.id.trim()) throw new Error('evidence id is required');
     if (!bundle.source.id.trim()) throw new Error('evidence source id is required');
     this.records.set(bundle.evidence.id, bundle);
   }
-
-  get(id: string): EvidenceBundle | undefined {
-    return this.records.get(id);
-  }
-
-  list(): EvidenceBundle[] {
-    return [...this.records.values()];
-  }
+  get(id: string): EvidenceBundle | undefined { return this.records.get(id); }
+  list(): EvidenceBundle[] { return [...this.records.values()]; }
 }
 
 export class InMemoryMissionRepository implements MissionRepository {
   private readonly records = new Map<string, MissionExecution>();
-
   save(mission: MissionExecution): void {
     if (!mission.missionId.trim()) throw new Error('mission id is required');
     this.records.set(mission.missionId, { ...mission });
   }
-
   get(missionId: string): MissionExecution | undefined {
     const mission = this.records.get(missionId);
     return mission ? { ...mission } : undefined;
@@ -67,14 +57,13 @@ export class InMemoryMissionRepository implements MissionRepository {
 
 export class InMemoryLearningObservationRepository implements LearningObservationRepository {
   private readonly records: LearningObservation[] = [];
-
   save(observation: LearningObservation): void {
     if (!observation.id.trim()) throw new Error('learning observation id is required');
     this.records.push({ ...observation, evidence: [...observation.evidence] });
   }
-
   listBySubject(subjectId: string): LearningObservation[] {
-    return this.records.filter((item) => item.subjectId === subjectId).map((item) => ({ ...item, evidence: [...item.evidence] }));
+    return this.records.filter((item) => item.subjectId === subjectId)
+      .map((item) => ({ ...item, evidence: [...item.evidence] }));
   }
 }
 
@@ -100,11 +89,7 @@ export interface RuntimeMissionResult {
   validation: VerticalSliceReport;
 }
 
-/**
- * Explicit application composition root. It wires repositories, gateway,
- * mission coordination, telemetry, learning collection, and validation while
- * keeping authorization and side-effect execution behind their existing gates.
- */
+/** Explicit application composition root for the autonomous kernel. */
 export class AutonomousRuntime {
   private readonly events: MissionEventStore;
   private readonly closedLoop: ClosedLoopIntegration;
@@ -132,8 +117,11 @@ export class AutonomousRuntime {
   }
 
   groundDecision(decision: DecisionRecord, now = Date.now()): RuntimeDecisionResult {
-    const evidence = this.dependencies.evidence.list();
-    const grounding = evaluateEvidenceGroundedDecision({ decision, evidence, now });
+    const grounding = evaluateEvidenceGroundedDecision({
+      decision,
+      evidence: this.dependencies.evidence.list(),
+      now,
+    });
     const evaluated = markDecisionEvaluated(decision, grounding.evaluation);
     const authorized = authorizeDecision(evaluated, grounding.ready);
     return { decision: authorized, grounding };
@@ -141,12 +129,14 @@ export class AutonomousRuntime {
 
   runMission(
     missionId: string,
-    decision: DecisionRecord,
+    grounded: RuntimeDecisionResult,
     request: GatewayExecutionRequest,
     policy: GatewayPolicyContext,
     now = Date.now()
   ): RuntimeMissionResult {
+    const decision = grounded.decision;
     if (decision.status !== 'authorized') throw new Error('decision must be authorized before mission execution');
+    if (!grounded.grounding.ready) throw new Error('decision grounding is not ready');
     if (request.decisionId !== decision.id) throw new Error('request decisionId must match authorized decision');
 
     this.latestLearning = undefined;
@@ -156,11 +146,7 @@ export class AutonomousRuntime {
     const learningObservation = this.latestLearning;
     const validation = validateVerticalSlice({
       decision,
-      evaluation: {
-        passed: true,
-        reasons: [],
-        trustedEvidenceIds: this.dependencies.evidence.list().map((bundle) => bundle.evidence.id),
-      },
+      evaluation: grounded.grounding.evaluation,
       execution: mission,
       events,
       learningObservation,
