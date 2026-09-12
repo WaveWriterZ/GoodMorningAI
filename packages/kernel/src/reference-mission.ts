@@ -6,14 +6,10 @@
  * is assessed by Module 54 before Module 55 evaluation.
  */
 
-import {
-  authorizeDecision,
-  markDecisionEvaluated,
-  DecisionRecord,
-} from './decision';
+import { authorizeDecision, markDecisionEvaluated, DecisionRecord } from './decision';
 import { CapabilityAdapter, CapabilityGateway, GatewayPolicyContext } from './capability-gateway';
 import { MissionExecutionCoordinator } from './mission-execution';
-import { MissionEventStore } from './mission-events';
+import { InMemoryMissionEventStore } from './mission-events';
 import { ClosedLoopIntegration, MissionTelemetry } from './closed-loop';
 import { LearningObservation } from './learning';
 import { validateVerticalSlice, VerticalSliceReport } from './vertical-validation';
@@ -78,12 +74,7 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
     id: decisionId,
     goalId: 'reference-goal',
     objective: 'prove the autonomous kernel vertical slice',
-    alternatives: [{
-      id: 'reference-alternative',
-      description: 'execute the deterministic reference capability',
-      expectedOutcome: 'verified reference result',
-      risk: 'low',
-    }],
+    alternatives: [{ id: 'reference-alternative', description: 'execute the deterministic reference capability', expectedOutcome: 'verified reference result', risk: 'low' }],
     selectedAlternativeId: 'reference-alternative',
     supportingEvidenceIds: ['reference-evidence-1'],
     contradictoryEvidenceIds: [],
@@ -99,31 +90,9 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
   };
 
   const evidence: EvidenceBundle[] = [{
-    source: {
-      id: 'reference-source-1',
-      type: 'document',
-      locator: 'reference://module-63',
-      provider: 'goodmorning-reference',
-      capturedAt: now,
-      trust: 1,
-    },
-    evidence: {
-      id: 'reference-evidence-1',
-      sourceId: 'reference-source-1',
-      contentHash: 'reference-hash-1',
-      observedAt: now,
-      capturedAt: now,
-      freshnessSeconds: 3600,
-      verificationStatus: 'verified',
-      confidence: 1,
-    },
-    provenance: [{
-      id: 'reference-provenance-1',
-      evidenceId: 'reference-evidence-1',
-      origin: 'reference-harness',
-      actor: actorId,
-      timestamp: now,
-    }],
+    source: { id: 'reference-source-1', type: 'document', locator: 'reference://module-63', provider: 'goodmorning-reference', capturedAt: now, trust: 1 },
+    evidence: { id: 'reference-evidence-1', sourceId: 'reference-source-1', contentHash: 'reference-hash-1', observedAt: now, capturedAt: now, freshnessSeconds: 3600, verificationStatus: 'verified', confidence: 1 },
+    provenance: [{ id: 'reference-provenance-1', evidenceId: 'reference-evidence-1', origin: 'reference-harness', actor: actorId, timestamp: now }],
   }];
 
   const grounded = evaluateEvidenceGroundedDecision({ decision, evidence, now });
@@ -133,13 +102,11 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
   const gateway = new CapabilityGateway();
   gateway.register(createReferenceAdapter(capabilityId, () => now));
 
-  const store = new MissionEventStore();
+  const store = new InMemoryMissionEventStore();
   let learningObservation: LearningObservation | undefined;
   const closedLoop = new ClosedLoopIntegration(store, {
     actorId,
-    onLearningObservation: (observation) => {
-      learningObservation = observation;
-    },
+    onLearningObservation: (observation) => { learningObservation = observation; },
   });
 
   const coordinator = new MissionExecutionCoordinator(gateway, {
@@ -167,22 +134,7 @@ export function runReferenceMission(config: ReferenceMissionConfig = {}): Refere
   };
   const mission = coordinator.execute(missionId, policy, now);
   const events = store.byMission(missionId);
+  const validation = validateVerticalSlice({ decision: authorizedDecision, evaluation: grounded.evaluation, execution: mission, events, learningObservation });
 
-  const validation = validateVerticalSlice({
-    decision: authorizedDecision,
-    evaluation: grounded.evaluation,
-    execution: mission,
-    events,
-    learningObservation,
-  });
-
-  return {
-    decision: authorizedDecision,
-    evaluation: grounded,
-    mission,
-    telemetry: closedLoop.telemetry(store, missionId),
-    learningObservation,
-    validation,
-    evidence,
-  };
+  return { decision: authorizedDecision, evaluation: grounded, mission, telemetry: closedLoop.telemetry(store, missionId), learningObservation, validation, evidence };
 }
