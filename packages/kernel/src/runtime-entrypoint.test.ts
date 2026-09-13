@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { CapabilityGateway } from './capability-gateway';
+import { CapabilityAdapter, CapabilityGateway } from './capability-gateway';
 import { createPersistenceBackedRuntime } from './runtime-entrypoint';
 import { EvidenceBundle } from './trust';
 import { DecisionRecord } from './decision';
@@ -15,16 +15,16 @@ function fixturePaths(root: string) {
   };
 }
 
-function adapter() {
+function adapter(): CapabilityAdapter {
   return {
     capabilityId: 'reference.echo',
     version: '1.0.0',
-    preflight: () => ({ status: 'ready', reasons: ['ok'] }),
-    execute: () => ({ status: 'succeeded', reasons: ['executed'] }),
-    verify: () => ({ status: 'verified', reasons: ['verified'] }),
-    rollback: () => ({ status: 'verified', reasons: ['rolled back'] }),
-    health: () => ({ healthy: true, reasons: ['ok'] }),
-  } as never;
+    preflight: () => ({ passed: true, reasons: ['ok'] }),
+    execute: () => ({ succeeded: true, output: 'ok', completedAt: 2000 }),
+    verify: () => ({ passed: true, reasons: ['verified'], verifiedAt: 2001 }),
+    rollback: () => ({ rolledBack: true, reference: 'rollback-1' }),
+    health: () => ({ healthy: true, details: 'ok' }),
+  };
 }
 
 describe('Module 66 persistence-backed runtime', () => {
@@ -32,9 +32,8 @@ describe('Module 66 persistence-backed runtime', () => {
     const root = mkdtempSync(join(tmpdir(), 'goodmorning-runtime-'));
     try {
       const paths = fixturePaths(root);
-      const gateway = new CapabilityGateway({
-        adapters: [adapter()],
-      } as never);
+      const gateway = new CapabilityGateway();
+      gateway.register(adapter());
       const runtimeA = createPersistenceBackedRuntime({ ...paths, gateway });
 
       const evidence: EvidenceBundle = {
@@ -64,17 +63,20 @@ describe('Module 66 persistence-backed runtime', () => {
       const request = {
         requestId: 'request-1',
         decisionId: 'decision-1',
+        authorizationId: 'authorization-1',
+        actorId: 'test-actor',
         capabilityId: 'reference.echo',
         target: 'reference',
-        payload: { hello: 'world' },
-      } as never;
+        action: 'echo',
+        payload: '{"hello":"world"}',
+      } as const;
       const policy = {
         authorizationValid: true,
         permissionGranted: true,
         safetyPassed: true,
-        targetIntact: true,
-        evidenceValid: true,
-      } as never;
+        targetUnchanged: true,
+        requiredEvidenceValid: true,
+      } as const;
 
       const result = runtimeA.runMission('mission-1', grounded, request, policy, 2000);
       expect(result.mission.status).toBe('completed');
