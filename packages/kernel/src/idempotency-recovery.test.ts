@@ -1,4 +1,5 @@
 import {
+  createRequestFingerprint,
   IdempotentPersistenceBackedRuntime,
   InMemoryExecutionIntentStore,
 } from './idempotency-recovery';
@@ -36,27 +37,22 @@ function runtimeStub(status: 'completed' | 'failed' | 'blocked' | 'recovery_requ
 }
 
 describe('Module 67 idempotency and recovery', () => {
+  const policy = {
+    authorizationValid: true,
+    permissionGranted: true,
+    safetyPassed: true,
+    targetUnchanged: true,
+    requiredEvidenceValid: true,
+  };
+
   test('executes a new key once and replays the terminal result', () => {
     const intents = new InMemoryExecutionIntentStore();
     const runtime = runtimeStub('completed');
     const service = new IdempotentPersistenceBackedRuntime(runtime as never, intents);
     const grounded = {} as never;
 
-    const first = service.runMission('key-1', 'mission-1', grounded, request(), {
-      authorizationValid: true,
-      permissionGranted: true,
-      safetyPassed: true,
-      targetUnchanged: true,
-      requiredEvidenceValid: true,
-    }, 100);
-
-    const second = service.runMission('key-1', 'mission-1', grounded, request(), {
-      authorizationValid: true,
-      permissionGranted: true,
-      safetyPassed: true,
-      targetUnchanged: true,
-      requiredEvidenceValid: true,
-    }, 200);
+    const first = service.runMission('key-1', 'mission-1', grounded, request(), policy, 100);
+    const second = service.runMission('key-1', 'mission-1', grounded, request(), policy, 200);
 
     expect(first.outcome).toBe('executed');
     expect(second.outcome).toBe('replayed');
@@ -69,13 +65,6 @@ describe('Module 67 idempotency and recovery', () => {
     const runtime = runtimeStub('completed');
     const service = new IdempotentPersistenceBackedRuntime(runtime as never, intents);
     const grounded = {} as never;
-    const policy = {
-      authorizationValid: true,
-      permissionGranted: true,
-      safetyPassed: true,
-      targetUnchanged: true,
-      requiredEvidenceValid: true,
-    };
 
     service.runMission('key-2', 'mission-1', grounded, request(), policy, 100);
     expect(() => service.runMission(
@@ -94,17 +83,10 @@ describe('Module 67 idempotency and recovery', () => {
     const runtime = runtimeStub('completed');
     const service = new IdempotentPersistenceBackedRuntime(runtime as never, intents);
     const grounded = {} as never;
-    const policy = {
-      authorizationValid: true,
-      permissionGranted: true,
-      safetyPassed: true,
-      targetUnchanged: true,
-      requiredEvidenceValid: true,
-    };
 
     intents.save({
       idempotencyKey: 'key-3',
-      requestFingerprint: 'placeholder',
+      requestFingerprint: createRequestFingerprint(request()),
       missionId: 'mission-1',
       executionId: 'exec-1',
       decisionId: 'decision-1',
@@ -130,13 +112,6 @@ describe('Module 67 idempotency and recovery', () => {
     };
     const service = new IdempotentPersistenceBackedRuntime(runtime as never, intents);
     const grounded = {} as never;
-    const policy = {
-      authorizationValid: true,
-      permissionGranted: true,
-      safetyPassed: true,
-      targetUnchanged: true,
-      requiredEvidenceValid: true,
-    };
 
     expect(() => service.runMission('key-4', 'mission-1', grounded, request(), policy, 100)).toThrow('runtime interrupted');
     expect(intents.get('key-4')?.status).toBe('recovery_required');
