@@ -101,7 +101,7 @@ const TERMINAL: ReadonlySet<ExecutionIntentStatus> = new Set([
   'expired',
 ]);
 
-function fingerprint(request: GatewayExecutionRequest): string {
+export function createRequestFingerprint(request: GatewayExecutionRequest): string {
   const canonical = JSON.stringify({
     decisionId: request.decisionId,
     authorizationId: request.authorizationId,
@@ -122,6 +122,12 @@ function intentStatus(missionStatus: MissionExecutionStatus): ExecutionIntentSta
     case 'recovery_required': return 'recovery_required';
     default: return 'executing';
   }
+}
+
+function outcomeFor(status: ExecutionIntentStatus): IdempotentMissionResult['outcome'] {
+  if (status === 'failed') return 'blocked';
+  if (status === 'recovery_required') return 'recovery_required';
+  return 'executed';
 }
 
 export class IdempotentPersistenceBackedRuntime {
@@ -145,7 +151,7 @@ export class IdempotentPersistenceBackedRuntime {
   ): IdempotentMissionResult {
     if (!idempotencyKey.trim()) throw new Error('idempotency key is required');
 
-    const requestFingerprint = fingerprint(request);
+    const requestFingerprint = createRequestFingerprint(request);
     const existing = this.intents.get(idempotencyKey);
 
     if (existing) {
@@ -192,7 +198,7 @@ export class IdempotentPersistenceBackedRuntime {
       };
       this.intents.save(finalIntent);
       return {
-        outcome: finalIntent.status === 'failed' ? 'blocked' : 'executed',
+        outcome: outcomeFor(finalIntent.status),
         intent: finalIntent,
         result,
       };
