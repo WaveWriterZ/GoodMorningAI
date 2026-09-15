@@ -19,3 +19,4 @@ export * from './evidence-decision-bridge';
 export * from './runtime-spine';
 export * from './durable-persistence';
 export * from './runtime-entrypoint';
+export * from './idempotency-recovery';
