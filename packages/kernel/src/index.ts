@@ -20,3 +20,4 @@ export * from './runtime-spine';
 export * from './durable-persistence';
 export * from './runtime-entrypoint';
 export * from './idempotency-recovery';
+export * from './recovery-reconciliation';
