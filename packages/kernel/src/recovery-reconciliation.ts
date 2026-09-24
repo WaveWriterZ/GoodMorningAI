@@ -1,0 +1,19 @@
+/** Module 68 — Autonomous Recovery & External-State Reconciliation */
+
+export type ExternalExecutionState = 'executed' | 'not_executed' | 'failed' | 'unknown';
+export type RecoveryResolution = 'finalized_executed' | 'finalized_failed' | 'retry_authorized' | 'escalated_unknown';
+export interface ExternalStateEvidence { state: ExternalExecutionState; source: string; observedAt: number; receipt?: unknown; detail?: string; }
+export interface RecoveryRecord { recoveryId: string; idempotencyKey: string; missionId: string; executionId: string; externalState: ExternalExecutionState; evidence: ExternalStateEvidence; resolution?: RecoveryResolution; retryAuthorizationId?: string; createdAt: number; updatedAt: number; }
+export interface RecoveryPersistence { get(id: string): RecoveryRecord | undefined; save(record: RecoveryRecord): void; }
+export interface ExternalStateResolver { resolve(intent: { idempotencyKey: string; missionId: string; executionId: string }): ExternalStateEvidence; }
+export class InMemoryRecoveryStore implements RecoveryPersistence { private records=new Map<string,RecoveryRecord>(); get(id:string){return this.records.get(id);} save(r:RecoveryRecord){this.records.set(r.recoveryId,{...r});} }
+export class RecoveryReconciliationService {
+ constructor(private intents:any, private recoveries:RecoveryPersistence){}
+ private intent(key:string){const x=this.intents.get(key);if(!x)throw new Error('execution intent '+key+' not found');return x;}
+ private base(key:string,now:number){const i=this.intent(key);const id='recovery:'+key;const old=this.recoveries.get(id);if(old)return old;const r={recoveryId:id,idempotencyKey:key,missionId:i.missionId,executionId:i.executionId,externalState:'unknown' as ExternalExecutionState,evidence:{state:'unknown' as ExternalExecutionState,source:'unresolved',observedAt:now},createdAt:now,updatedAt:now};this.recoveries.save(r);return r;}
+ reconcile(key:string,resolver:ExternalStateResolver,now=Date.now()){const i=this.intent(key);const b=this.base(key,now);if(b.resolution)return b;const e=resolver.resolve(i);const r={...b,externalState:e.state,evidence:e,updatedAt:e.observedAt};this.recoveries.save(r);return r;}
+ confirmExecuted(key:string,e:ExternalStateEvidence,now=Date.now()){const b=this.base(key,now);const i=this.intent(key);this.intents.save({...i,status:'verified',updatedAt:now,receipt:e.receipt});const r={...b,externalState:'executed' as ExternalExecutionState,evidence:{...e,state:'executed' as const},resolution:'finalized_executed' as const,resolvedAt:now,updatedAt:now};this.recoveries.save(r);return r;}
+ markFailed(key:string,e:ExternalStateEvidence,now=Date.now()){const b=this.base(key,now);const i=this.intent(key);this.intents.save({...i,status:'failed',updatedAt:now});const r={...b,externalState:'failed' as ExternalExecutionState,evidence:{...e,state:'failed' as const},resolution:'finalized_failed' as const,resolvedAt:now,updatedAt:now};this.recoveries.save(r);return r;}
+ authorizeRetry(key:string,authorizationId:string,e:ExternalStateEvidence,now=Date.now()){if(!authorizationId.trim())throw new Error('retry authorization id is required');if(e.state!=='not_executed')throw new Error('retry requires verified not_executed external state');const b=this.base(key,now);const i=this.intent(key);this.intents.save({...i,status:'recovery_required',updatedAt:now});const r={...b,externalState:'not_executed' as ExternalExecutionState,evidence:e,resolution:'retry_authorized' as const,retryAuthorizationId:authorizationId,resolvedAt:now,updatedAt:now};this.recoveries.save(r);return r;}
+ escalateUnknown(key:string,e:ExternalStateEvidence,now=Date.now()){if(e.state!=='unknown')throw new Error('escalation requires unknown external state');const b=this.base(key,now);const r={...b,externalState:'unknown' as const,evidence:e,resolution:'escalated_unknown' as const,resolvedAt:now,updatedAt:now};this.recoveries.save(r);return r;}
+}
